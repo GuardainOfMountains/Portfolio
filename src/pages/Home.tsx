@@ -19,8 +19,8 @@ export default function Home() {
           
           <h1 className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 leading-[0.9]">
             I BUILD TOOLS <br />
-            <span className="text-muted-foreground">THAT HELPS PEOPLE</span> <br />
-            WORK BETTER.
+            <span className="text-muted-foreground">CREATE CONTENT</span> <br />
+            FOREVER STUDYING
           </h1>
           
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mb-12 font-light">
