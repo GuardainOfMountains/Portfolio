@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terminus — Learn the Terminal</title>
+  <link rel="stylesheet" href="/src/assets/game/game.css">
+</head>
+<body>
+  <!-- Bonzi tree forest background -->
+  <div class="bonzi-forest">
+    <div class="bonzi-tree tree-1 glow"></div>
+    <div class="bonzi-tree tree-2"></div>
+    <div class="bonzi-tree tree-3"></div>
+    <div class="bonzi-tree tree-4 glow"></div>
+    <div class="bonzi-tree tree-5"></div>
+    <div class="bonzi-tree tree-6"></div>
+    <div class="bonzi-tree tree-7 glow"></div>
+    <div class="bonzi-tree tree-8"></div>
+    <div class="bonzi-tree tree-9"></div>
+    <div class="bonzi-tree tree-10 glow"></div>
+    <div class="bonzi-tree tree-11"></div>
+    <div class="bonzi-tree tree-12"></div>
+    <div class="bonzi-tree tree-13 glow"></div>
+  </div>
+  <div class="terminal-wrap">
+    <header class="terminal-header">
+      <span class="title">terminus</span>
+      <span class="subtitle">// learn the way of the shell</span>
+      <a href="projects.html" class="back-link">Return to Projects</a>
+    </header>
+    <div class="terminal">
+      <div id="cmd-ref" class="cmd-ref">
+        <strong>Commands</strong>
+        <div>ls — list files</div>
+        <div>cd <dir> — enter Dir</div>
+        <div>cd .. — go back</div>
+        <div>pwd — current path</div>
+        <div>cat <file> — read file</div>
+        <div>echo <text> — print</div>
+        <div>echo > / >> — write</div>
+        <div>mkdir <dir> — new dir</div>
+        <div>touch <file> — new file</div>
+        <div>rm <file> — remove</div>
+        <div>rmdir <dir> — rm dir</div>
+        <div>man <cmd> — manual</div>
+        <div>help — all cmds</div>
+      </div>
+      <div id="output" class="output"></div>
+      <div class="input-line">
+        <span class="prompt" id="prompt"></span>
+        <input type="text" id="input" class="input" autocomplete="off" spellcheck="false" autofocus>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/src/assets/game/game.js"></script>
+</body>
+</html>
