@@ -279,6 +279,41 @@
     print('', 'system');
   }
 
+  // Print contextual command hints based on current location
+  function printCommandHints(path) {
+    const hints = [];
+    const node = getNode(path);
+    const hasFiles = node && node.children && Object.keys(node.children).length > 0;
+    const hasCorrupted = node && node.children && Object.values(node.children).some(c => c.type === 'corrupted' || c.type === 'corrupted_folder');
+    const isRoot = path === '';
+    const isHome = path === 'home';
+    const isBasement = path === 'home/basement';
+    const isForest = path === 'forest';
+
+    // Base hints for all locations
+    hints.push('ls | cd | cat | rm');
+
+    // Context-specific hints
+    if (isRoot) {
+      hints.push('cd home — enter house  |  cd forest — go outside');
+    } else if (isHome) {
+      hints.push('ls — see rooms  |  cd <room> — explore');
+    } else if (isForest) {
+      hints.push('cd hillside — look around  |  cd cave — find source');
+    } else if (isBasement) {
+      hints.push('sudo rm V1rUs_c0R3 — delete virus');
+    } else if (hasCorrupted) {
+      hints.push('rm badfile — destroy corruption');
+    }
+
+    if (hasFiles && !isBasement) {
+      hints.push('cat <file> — read contents');
+    }
+
+    // Print hints with appropriate styling
+    hints.forEach(h => print(h, 'system'));
+  }
+
   // Add a node (file or dir) under the current working directory
   function addNodeAtCwd(name, node) {
     const parent = getNode(cwd);
@@ -382,6 +417,8 @@
         setPrompt();
         const d = getDirDesc(cwd);
         if (d) print(d, 'system');
+        // Show contextual command hints
+        printCommandHints(cwd);
         if (newPath === '') {
           print('You are at the root of the filesystem.', 'system');
           print('Use "ls" to see what\'s here, then "cd <directory>" to enter one (e.g. cd home).', 'system');
@@ -775,6 +812,7 @@
     print('');
     cwd = 'home';
     setPrompt();
+    printCommandHints('home');
   }
 
   function victoryMessage() {
