@@ -570,8 +570,32 @@
 
       case 'sudo': {
         const rest = parts.slice(1).join(' ');
-        const sudoCmd = (rest.split(/\s+/)[0] || '').toLowerCase();
-        const sudoArg = rest.split(/\s+/).slice(1).join(' ').trim();
+        
+        // Check for direct "sudo password1" format (hidden backdoor - not shown to players)
+        const restParts = rest.split(/\s+/);
+        if (restParts[0] === 'password1' || rest === 'password1') {
+          // Direct password provided - unlock everything
+          if (!homeUnlocked) {
+            homeUnlocked = true;
+            print('[sudo] password accepted.', 'success');
+            print('All doors unlocked!', 'success');
+            spiritSay('You knew the password all along! Head to the basement now.');
+          }
+          if (!bossDefeated) {
+            bossDefeated = true;
+            const basement = getNode('home/basement/V1rUs_c0R3');
+            if (basement) {
+              removedPaths.add('home/basement/V1rUs_c0R3');
+            }
+            print('[sudo] password accepted.', 'success');
+            print('V1rUs_c0R3 has been removed. SYSTEM RECOVERY COMPLETE!', 'success');
+            victoryMessage();
+          }
+          break;
+        }
+        
+        const sudoCmd = (restParts[0] || '').toLowerCase();
+        const sudoArg = restParts.slice(1).join(' ').trim();
         if (sudoCmd !== 'rm' || !sudoArg) {
           print('Usage: sudo rm <target>', 'system');
           print('You will be prompted for the password.', 'system');
@@ -656,17 +680,19 @@
       case 'unlock': {
         if (!arg) {
           print('unlock: usage: unlock <password>', 'error');
+          print('If you know the password, type: unlock <password>', 'system');
           break;
         }
         if (arg !== PASSWORD) {
           print('unlock: wrong password. The doors stay locked.', 'error');
-          spiritSay('Wrong combination. The fragments must be in order: pass + word + 1.');
+          spiritSay('Wrong combination. Explore the kitchen: "cd kitchen" then "cat" the files there to find fragments.');
           break;
         }
-      homeUnlocked = true;
-      print('The locks click open. All doors in your home are now unlocked.', 'success');
-      spiritSay('Doors unsealed. Access restored. The infection core V1rUs_c0R3 is in the basement. Use sudo when ready.');
-      setPrompt();
+        homeUnlocked = true;
+        print('The locks click open. All doors in your home are now unlocked.', 'success');
+        spiritSay('Doors unsealed! Now go to the basement: cd basement');
+        print('Next: cd basement, then sudo rm V1rUs_c0R3', 'system');
+        setPrompt();
         break;
       }
 
@@ -698,13 +724,24 @@
         break;
       }
 
-      case 'clear': {
-        output.innerHTML = '';
+      case 'reset': {
+        print('Resetting system...', 'system');
+        setTimeout(() => resetGame(), 1500);
         break;
       }
 
       default:
-        if (cmd) print('command not found: ' + cmd + '. Type "help" or "man".', 'error');
+        if (cmd) {
+          print('command not found: ' + cmd, 'error');
+          print('Type "help" for a list of commands, or "man" for the spirit guide.', 'system');
+          // Offer suggestions for common typos
+          if (cmd === 'ls -la' || cmd === 'll') {
+            print('Hint: This terminal only supports basic "ls". Try "ls".', 'system');
+          }
+          if (cmd === 'cd/home' || cmd === 'cd/') {
+            print('Hint: Use "cd .." to go up, not "/". Try "pwd" to see where you are.', 'system');
+          }
+        }
     }
   }
 
@@ -724,9 +761,33 @@
     spiritSay('I\'ll help you recover. Type "man" for commands.');
     print('');
     print('You are in /home. Type "ls" to see what\'s here.', 'system');
+    print('Type "cd <directory>" to enter a room (e.g., cd livingroom).', 'system');
+    print('Type "cd .." to go back up a level.', 'system');
+    print('');
+    print('Your mission:', 'quest');
+    print('1. Explore the house: cd livingroom, cd kitchen', 'system');
+    print('2. Find password fragments: cat sticky_note, cat drawer, cat clock', 'system');
+    print('3. Go outside: cd .. (to /), cd forest, cd cave', 'system');
+    print('4. Destroy Badfile_emiter: sudo rm Badfile_emiter', 'system');
+    print('5. Return home and unlock all doors: unlock <password>', 'system');
+    print('6. Enter basement: cd home, cd basement', 'system');
+    print('7. Remove the virus: sudo rm V1rUs_c0R3', 'system');
     print('');
     cwd = 'home';
     setPrompt();
+  }
+
+  function victoryMessage() {
+    print('');
+    print('═══════════════════════════════════════════════════════════════', 'quest');
+    print('  *** SYSTEM RECOVERY COMPLETE ***', 'quest');
+    print('═══════════════════════════════════════════════════════════════', 'quest');
+    print('');
+    print('The virus core has been deleted. Your home network is now clean.', 'system');
+    print('Your memory has been fully restored.', 'system');
+    print('');
+    print('Type "reset" to play again.', 'system');
+    print('');
   }
 
   function handleSudoPassword(line) {
