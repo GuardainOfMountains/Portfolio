@@ -225,31 +225,73 @@
   const history = [];
   let historyIndex = -1;
 
-  function print(text, className = '') {
-    const line = document.createElement('div');
-    line.className = 'line' + (className ? ' ' + className : '');
-    line.textContent = text;
-    output.appendChild(line);
+  // ----- Performance Optimization: Terminal Lines History -----
+  // Store all terminal output in an array for virtual scrolling
+  const terminalLines = [];
+  const MAX_VISIBLE_LINES = 100; // Only render last 100 lines to DOM
+  let renderPending = false; // Batch render flag to prevent multiple RAF calls
+
+  // Schedule a batched render using requestAnimationFrame
+  function scheduleRender() {
+    if (renderPending) return;
+    renderPending = true;
+    requestAnimationFrame(() => {
+      renderBatch();
+      renderPending = false;
+    });
+  }
+
+  // Render only the visible portion of terminal history
+  function renderBatch() {
+    // Only render the last MAX_VISIBLE_LINES
+    const startIndex = Math.max(0, terminalLines.length - MAX_VISIBLE_LINES);
+    const visibleLines = terminalLines.slice(startIndex);
+    
+    // Clear and rebuild only visible portion
+    output.innerHTML = '';
+    
+    visibleLines.forEach(line => {
+      if (line.isHtml) {
+        // For ls output with colored spans
+        const div = document.createElement('div');
+        div.className = 'line';
+        div.innerHTML = line.html;
+        output.appendChild(div);
+      } else {
+        const div = document.createElement('div');
+        div.className = 'line' + (line.className ? ' ' + line.className : '');
+        div.textContent = line.text;
+        output.appendChild(div);
+      }
+    });
+    
+    // Single scroll to bottom after batch
     output.scrollTop = output.scrollHeight;
   }
 
+  function print(text, className = '') {
+    // Add to history array instead of directly to DOM
+    terminalLines.push({ text, className, isHtml: false });
+    scheduleRender();
+  }
+
   function printLsLine(names, path) {
-    const line = document.createElement('div');
-    line.className = 'line';
+    // Build HTML for colored ls output
     const node = getNode(path);
     const children = node && node.children || {};
+    let html = '';
     names.forEach((name, i) => {
-      if (i > 0) line.appendChild(document.createTextNode('  '));
-      const span = document.createElement('span');
+      if (i > 0) html += '  ';
       const child = children[name];
-      if (child.type === 'dir') span.className = 'ls-dir';
-      else if (child.type === 'corrupted' || child.type === 'corrupted_folder' || child.type === 'boss') span.className = 'ls-bad';
-      else span.className = 'ls-file';
-      span.textContent = name;
-      line.appendChild(span);
+      let className = 'ls-file';
+      if (child.type === 'dir') className = 'ls-dir';
+      else if (child.type === 'corrupted' || child.type === 'corrupted_folder' || child.type === 'boss') className = 'ls-bad';
+      html += '<span class="' + className + '">' + name + '</span>';
     });
-    output.appendChild(line);
-    output.scrollTop = output.scrollHeight;
+    
+    // Store HTML content in terminalLines array
+    terminalLines.push({ text: '', html: html, isHtml: true, className: '' });
+    scheduleRender();
   }
 
   function printLines(text, className = '') {
@@ -337,7 +379,8 @@
     // Restore filesystem
     fs = JSON.parse(JSON.stringify(INITIAL_FS));
 
-    // Clear screen and start over
+    // Clear terminal history array and DOM
+    terminalLines.length = 0;
     output.innerHTML = '';
     promptName();
   }
@@ -732,6 +775,12 @@
         break;
       }
 
+      case 'clear': {
+        terminalLines.length = 0;
+        output.innerHTML = '';
+        break;
+      }
+
       case 'reset': {
         print('Resetting system...', 'system');
         setTimeout(() => resetGame(), 1500);
@@ -754,6 +803,8 @@
   }
 
   function startAct1() {
+    // Clear terminal history array and DOM
+    terminalLines.length = 0;
     output.innerHTML = '';
     print('═══════════════════════════════════════════════════════════════', 'quest');
     print('  ACT 1: SYSTEM RECOVERY', 'quest');

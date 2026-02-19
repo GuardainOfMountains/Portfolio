@@ -265,6 +265,10 @@ body::after {
   margin-bottom: 0.5rem;
   min-height: 200px;
   padding-right: 200px;
+  /* Performance optimization: isolate layout changes */
+  contain: content;
+  /* Hint to browser about dynamic content */
+  will-change: scroll-position;
 }
 
 .output .line {
@@ -300,15 +304,17 @@ body::after {
 .output .line .ls-bad {
   color: var(--neon-pink);
   text-shadow: 0 0 6px rgba(255, 45, 123, 0.4);
+  /* Performance: use GPU-accelerated opacity for animation */
+  will-change: opacity;
   animation: glitch 3s infinite;
 }
 
 @keyframes glitch {
   0%, 90%, 100% { opacity: 1; }
-  92% { opacity: 0.4; transform: translateX(2px); }
-  94% { opacity: 1; transform: translateX(-1px); }
-  96% { opacity: 0.6; transform: translateX(1px); }
-  98% { opacity: 1; transform: translateX(0); }
+  92% { opacity: 0.4; }
+  94% { opacity: 1; }
+  96% { opacity: 0.6; }
+  98% { opacity: 1; }
 }
 
 .output .line.quest {
