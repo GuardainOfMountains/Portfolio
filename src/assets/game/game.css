@@ -258,21 +258,6 @@ body::after {
   text-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
 }
 
-.cmd-ref .cmd {
-  color: var(--neon-green);
-  font-weight: 600;
-}
-
-.cmd-ref .hint {
-  margin-top: 0.4rem;
-  padding-top: 0.3rem;
-  border-top: 1px solid var(--border);
-  color: var(--amber);
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
 /* ─── Output Area ─── */
 .output {
   flex: 1;
