@@ -279,6 +279,12 @@
     print('', 'system');
   }
 
+  // Show command hints at every location (Act 1)
+  function showCommandHints() {
+    print('', 'system');
+    print('💡 Commands: ls (list) | cd <dir> (enter) | cat <file> (read) | rm <file> (delete)', 'system');
+  }
+
   // Add a node (file or dir) under the current working directory
   function addNodeAtCwd(name, node) {
     const parent = getNode(cwd);
@@ -382,6 +388,7 @@
         setPrompt();
         const d = getDirDesc(cwd);
         if (d) print(d, 'system');
+        showCommandHints();
         if (newPath === '') {
           print('You are at the root of the filesystem.', 'system');
           print('Use "ls" to see what\'s here, then "cd <directory>" to enter one (e.g. cd home).', 'system');
@@ -699,20 +706,21 @@
       case 'man': {
         const topic = (arg || '').toLowerCase();
         const manPages = {
-          '': 'I\'m the system daemon. Type "man" for help with commands. Goal: find password fragments, clear Badfile_emiter in the forest, then remove V1rUs_c0R3 from the basement.',
-          ls: 'LS(1)\n\n  ls — list directory contents\n\n  Use "ls" to see files and directories in your current location. Try it now.',
-          cd: 'CD(1)\n\n  cd <directory> — change directory\n\n  Move into a place: "cd livingroom". Go back: "cd ..".',
-          pwd: 'PWD(1)\n\n  pwd — print name of current directory\n\n  Shows your full path, e.g. /home/kitchen.',
-          cat: 'CAT(1)\n\n  cat <file> — read and display file contents\n\n  Read a file without changing anything. Example: "cat sticky_note".',
-          rm: 'RM(1)\n\n  rm <file> — remove files\n\n  Here, "rm" destroys corrupted files. "rm badfile". Some targets require "sudo rm".',
-          sudo: 'SUDO(8)\n\n  sudo rm <target> — run remove as superuser\n\n  Badfile_emiter (forest cave) and V1rUs_c0R3 (basement) require sudo. Password = three fragments combined.',
-          unlock: 'UNLOCK(1)\n\n  unlock <password> — unlock locked doors\n\n  Use password from fragments (pass+word+1 = password1). Or destroy Badfile_emiter in forest cave: "sudo rm Badfile_emiter".',
-          echo: 'ECHO(1)\n\n  echo <text> — display text\n  echo <text> > <file> — overwrite file with text\n  echo <text> >> <file> — append text to file\n\n  Files are created automatically if they don\'t exist. Use quotes for text with spaces.',
-          mkdir: 'MKDIR(1)\n\n  mkdir <directory> — create an empty directory\n\n  Example: mkdir documents',
-          touch: 'TOUCH(1)\n\n  touch <file> — create an empty file\n\n  Example: touch notes.txt',
-          rmdir: 'RMDIR(1)\n\n  rmdir <directory> — remove an empty directory\n\n  Cannot delete system directories. Example: rmdir oldfolder'
+          '': 'MISSION: Find 3 password fragments in the house → Destroy Badfile_emiter in forest cave → Unlock home → Remove V1rUs_c0R3 from basement',
+          ls: 'List files and directories in current location.',
+          cd: 'Change directory. Use "cd .." to go back.',
+          cat: 'Read and display file contents.',
+          rm: 'Remove/delete files. Use "sudo rm" for locked files.',
+          pwd: 'Print current directory path.',
+          echo: 'Display text or write to files using > or >>.',
+          mkdir: 'Create a new directory.',
+          touch: 'Create an empty file.',
+          rmdir: 'Remove an empty directory.',
+          sudo: 'Run commands as superuser. Required for boss files.',
+          unlock: 'Unlock doors using the password.',
+          help: 'Show available commands.'
         };
-        const msg = manPages[topic] || manPages[''];
+        const msg = manPages[topic] || 'Unknown command. Try: man ls, man cd, man cat, man rm';
         printLines(msg, 'less-content');
         break;
       }
@@ -763,6 +771,7 @@
     print('You are in /home. Type "ls" to see what\'s here.', 'system');
     print('Type "cd <directory>" to enter a room (e.g., cd livingroom).', 'system');
     print('Type "cd .." to go back up a level.', 'system');
+    showCommandHints();
     print('');
     print('Your mission:', 'quest');
     print('1. Explore the house: cd livingroom, cd kitchen', 'system');
