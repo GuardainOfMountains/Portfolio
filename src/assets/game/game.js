@@ -1,6 +1,8 @@
 /**
- * Terminus — ACT 1: The Forgotten Password
- * Terminal learning game. Commands: ls, cd, pwd, cat, rm, mkdir, touch, rmdir, echo, man, sudo, unlock, help, clear
+ * Terminus — ACT 1: The Forgotten Password | ACT 2: System Hardening
+ * Terminal learning game.
+ * Act 1: ls, cd, pwd, cat, rm, mkdir, touch, rmdir, echo, man, sudo, unlock, help, clear
+ * Act 2: sudo apt update/upgrade/clean/autoremove, sudo apt install antivirus, antivirus, tar -xzf
  */
 
 (function () {
@@ -21,6 +23,15 @@
   const journalEntries = [];  // lines appended via echo >> journal
   let bedroomEchoTaught = false;
 
+  // ----- Act 2: System Maintenance State -----
+  let aptUpdated = false;
+  let aptUpgraded = false;
+  let aptCleaned = false;
+  let aptAutoremoved = false;
+  let antivirusInstalled = false;
+  let firewallDownloaded = false;
+  let badfilesRemoved = 0;
+
   // ----- Virtual filesystem: Home (7 rooms) + Forest (hillside, cave) -----
   let fs = {
     '': {
@@ -38,7 +49,14 @@
                   type: 'file',
                   content: 'A note in your handwriting:\n\n"If you\'re reading this, they got you. Memory wipe. To escape the house protocol: go UP one level. cd .. and list what\'s there. You\'ll see home. You\'ll see forest. One is a prison. One is a war zone. Neither is safe anymore."'
                 },
-                badfile: { type: 'corrupted', name: 'badfile' }
+                nested: {
+                  type: 'dir',
+                  desc: 'A nested directory.',
+                  children: {
+                    badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
+                  }
+                },
+                badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
               }
             },
             kitchen: {
@@ -60,7 +78,7 @@
                   content: 'The digital clock blinks: 1:11 1:11 1:11. The first digit burns brighter.\n"1"\n\n<<FRAGMENT ACQUIRED: 1>>',
                   fragment: '1'
                 },
-                badfile: { type: 'corrupted', name: 'badfile' }
+                badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
               }
             },
             bedroom: {
@@ -72,7 +90,7 @@
                   writable: true,
                   content: 'From your journal:\n\n"Memory degradation: 47%. I\'m forgetting faster. The virus learns. If I forget the sudo password, it\'s over. The password is three fragments combined. Something simple. Something I\'d use every day. Find them. Unlock the doors. Get to the basement."'
                 },
-                badfile: { type: 'corrupted', name: 'badfile' }
+                badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
               }
             },
             bathroom: {
@@ -83,7 +101,7 @@
                   type: 'file',
                   contentRef: 'mirror'
                 },
-                badfile: { type: 'corrupted', name: 'badfile' }
+                badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
               }
             },
             diningroom: {
@@ -94,7 +112,7 @@
                   type: 'file',
                   content: 'A note on the table:\n\n"The basement holds the infection core. You need SUPERUSER ACCESS. Find the fragments. Use "unlock" with the password, then descend."'
                 },
-                badfile: { type: 'corrupted', name: 'badfile' }
+                badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
               }
             },
             attic: {
@@ -104,7 +122,8 @@
                 old_disk: {
                   type: 'file',
                   content: 'An old 3.5" floppy disk. The label reads:\n\n*"BACKUP PASSWORD - BREAK GLASS IN CASE OF APOCALYPSE password1"*\n\n<<MEMORY RESTORED: FULL SUDO PASSWORD IS password1>>'
-                }
+                },
+                badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
               }
             },
             basement: {
@@ -114,7 +133,8 @@
                 V1rUs_c0R3: {
                   type: 'boss',
                   content: 'V1RUS CORE DETECTED\n\nA corrupted data mass blocks the basement. It\'s been here the whole time.\n\nRoot access required to delete.\n\n>> sudo rm V1rUs_c0R3'
-                }
+                },
+                badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
               }
             }
           }
@@ -127,17 +147,95 @@
               type: 'dir',
               desc: 'A steep hillside. The terrain glitches, polygons flickering. A badfile clings to the rocks, pulsing faintly.',
               children: {
-                badfile: { type: 'corrupted', name: 'badfile' }
+                badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
               }
             },
             cave: {
               type: 'dir',
               desc: 'A dark cave. The walls show raw, hexadecimal code. Inside is Badfile_emiter—a corrupted folder. It can only be destroyed with root access.',
               children: {
-                badfile: { type: 'corrupted', name: 'badfile' },
+                badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' },
                 Badfile_emiter: { type: 'corrupted_folder', name: 'Badfile_emiter' }
               }
             }
+          }
+        },
+        // Act 2: System directories
+        var: {
+          type: 'dir',
+          desc: 'System variables and cache.',
+          children: {
+            cache: {
+              type: 'dir',
+              desc: 'Cache directory.',
+              children: {
+                apt: {
+                  type: 'dir',
+                  desc: 'APT package cache.',
+                  children: {
+                    archives: { type: 'dir', desc: 'Downloaded packages.', children: {} },
+                    badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
+                  }
+                },
+                badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
+              }
+            },
+            log: {
+              type: 'dir',
+              desc: 'System log files.',
+              children: {
+                badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
+              }
+            }
+          }
+        },
+        tmp: {
+          type: 'dir',
+          desc: 'Temporary files.',
+          children: {
+            downloads: { 
+              type: 'dir', 
+              desc: 'Downloaded files.', 
+              children: {
+                badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
+              }
+            },
+            badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
+          }
+        },
+        etc: {
+          type: 'dir',
+          desc: 'System configuration.',
+          children: {
+            firewall: { type: 'dir', desc: 'Firewall configuration.', children: {} },
+            config: {
+              type: 'dir',
+              desc: 'Configuration files.',
+              children: {
+                badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
+              }
+            },
+            badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
+          }
+        },
+        usr: {
+          type: 'dir',
+          desc: 'User programs and data.',
+          children: {
+            share: {
+              type: 'dir',
+              desc: 'Shared data.',
+              children: {
+                badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
+              }
+            }
+          }
+        },
+        'lost+found': {
+          type: 'dir',
+          desc: 'Lost and found recovered files.',
+          children: {
+            badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
           }
         }
       }
@@ -646,6 +744,130 @@
         
         const sudoCmd = (restParts[0] || '').toLowerCase();
         const sudoArg = restParts.slice(1).join(' ').trim();
+        
+        // ----- Handle apt commands -----
+        if (sudoCmd === 'apt') {
+          const aptSubCmd = (restParts[1] || '').toLowerCase();
+          const aptArg = restParts.slice(2).join(' ').trim();
+          
+          // apt update
+          if (aptSubCmd === 'update') {
+            print('Reading package lists... Done', 'system');
+            print('Building dependency tree... Done', 'system');
+            print('All packages up to date.', 'success');
+            aptUpdated = true;
+            spiritSay('Package lists refreshed. Run "sudo apt upgrade" to install updates.');
+            break;
+          }
+          
+          // apt upgrade
+          if (aptSubCmd === 'upgrade') {
+            if (!aptUpdated) {
+              print('E: apt upgrade requires apt update first. Run "sudo apt update".', 'error');
+              break;
+            }
+            print('Reading package lists... Done', 'system');
+            print('Building dependency tree... Done', 'system');
+            print('Calculating upgrade... Done', 'system');
+            print('The following packages will be upgraded:', 'system');
+            print('  libc6 (2.31-0ubuntu9.3) -> 2.31-0ubuntu9.4', 'system');
+            print('  systemd (245.4-4ubuntu3) -> 245.4-4ubuntu3.1', 'system');
+            print('  openssl (1.1.1f-1ubuntu2) -> 1.1.1f-1ubuntu2.1', 'system');
+            print('  system-lib (2.1.0) -> 2.2.0', 'system');
+            print('', 'system');
+            print('Do you want to continue? [Y/n]', 'system');
+            // Store pending apt upgrade
+            inputEl.dataset.aptUpgradePending = '1';
+            inputEl.placeholder = '(type Y or n)';
+            inputEl.focus();
+            break;
+          }
+          
+          // apt clean
+          if (aptSubCmd === 'clean') {
+            if (!aptUpgraded) {
+              print('E: apt clean requires apt upgrade first. Run "sudo apt upgrade".', 'error');
+              break;
+            }
+            // Clear the apt archives
+            const archives = getNode('var/cache/apt/archives');
+            if (archives && archives.children) {
+              Object.keys(archives.children).forEach(key => {
+                delete archives.children[key];
+              });
+            }
+            print('Reading package lists... Done', 'system');
+            print('Deleting cached package files... Done', 'system');
+            print('Freed 45.2 MB of disk space.', 'success');
+            aptCleaned = true;
+            spiritSay('Cache cleaned. Run "sudo apt autoremove" to remove unused dependencies.');
+            break;
+          }
+          
+          // apt autoremove
+          if (aptSubCmd === 'autoremove') {
+            if (!aptCleaned) {
+              print('E: apt autoremove requires apt clean first. Run "sudo apt clean".', 'error');
+              break;
+            }
+            print('Reading package lists... Done', 'system');
+            print('Building dependency tree... Done', 'system');
+            print('The following packages will be REMOVED:', 'system');
+            print('  old-dependency-1.0', 'system');
+            print('  unused-lib-2.1', 'system');
+            print('  deprecated-tool-1.2', 'system');
+            print('Removing unused packages... Done', 'success');
+            aptAutoremoved = true;
+            spiritSay('System maintenance complete. Now install protection: sudo apt install antivirus');
+            break;
+          }
+          
+          // apt install
+          if (aptSubCmd === 'install') {
+            if (!aptAutoremoved) {
+              print('E: apt install requires completing system maintenance first.', 'error');
+              print('Run: sudo apt update && sudo apt upgrade && sudo apt clean && sudo apt autoremove', 'system');
+              break;
+            }
+            
+            if (aptArg === 'antivirus') {
+              // Prompt for password
+              spiritSay('The spirit asks: "What is the sudo password?"');
+              print('[sudo] password for ' + (userName || 'user') + ': ', 'system');
+              inputEl.dataset.sudoTarget = 'install_antivirus';
+              inputEl.dataset.sudoPending = '1';
+              inputEl.placeholder = '(type password and press Enter)';
+              inputEl.focus();
+              break;
+            }
+            
+            if (aptArg === 'firewall') {
+              if (!antivirusInstalled || badfilesRemoved < 20) {
+                print('E: firewall requires antivirus to be installed and all threats removed first.', 'error');
+                break;
+              }
+              // Prompt for password
+              spiritSay('The spirit asks: "What is the sudo password?"');
+              print('[sudo] password for ' + (userName || 'user') + ': ', 'system');
+              inputEl.dataset.sudoTarget = 'install_firewall';
+              inputEl.dataset.sudoPending = '1';
+              inputEl.placeholder = '(type password and press Enter)';
+              inputEl.focus();
+              break;
+            }
+            
+            print('E: Unknown package: ' + aptArg, 'error');
+            print('Available packages: antivirus, firewall', 'system');
+            break;
+          }
+          
+          // Unknown apt subcommand
+          print('apt: Unknown subcommand: ' + aptSubCmd, 'error');
+          print('Usage: apt update | apt upgrade | apt clean | apt autoremove | apt install <package>', 'system');
+          break;
+        }
+        
+        // ----- Handle rm command -----
         if (sudoCmd !== 'rm' || !sudoArg) {
           print('Usage: sudo rm <target>', 'system');
           print('You will be prompted for the password.', 'system');
@@ -749,7 +971,7 @@
       case 'man': {
         const topic = (arg || '').toLowerCase();
         const manPages = {
-          '': 'MISSION: Find 3 password fragments in the house → Destroy Badfile_emiter in forest cave → Unlock home → Remove V1rUs_c0R3 from basement',
+          '': 'MISSION: Find 3 password fragments in the house → Destroy Badfile_emiter in forest cave → Unlock home → Remove V1rUs_c0R3 from basement → Run system maintenance (apt update/upgrade/clean/autoremove) → Install antivirus → Install firewall',
           ls: 'List files and directories in current location.\n\nExample: ls',
           cd: 'Change directory. Use "cd .." to go back.\n\nExamples:\n  cd livingroom   (enter a room)\n  cd ..          (go back/up)\n  cd /            (go to root)',
           cat: 'Read and display file contents.\n\nExamples:\n  cat note        (read a file called "note")\n  cat sticky_note (read a file)',
@@ -759,12 +981,17 @@
           mkdir: 'Create a new directory.\n\nExample: mkdir myfolder',
           touch: 'Create an empty file.\n\nExample: touch myfile.txt',
           rmdir: 'Remove an empty directory.\n\nExample: rmdir myfolder',
-          sudo: 'Run commands as superuser. Required for boss files.\n\nExamples:\n  sudo rm Badfile_emiter (destroy virus emitter)\n  sudo rm V1rUs_c0R3    (destroy virus core)',
+          sudo: 'Run commands as superuser. Required for boss files and package management.\n\nExamples:\n  sudo rm Badfile_emiter (destroy virus emitter)\n  sudo apt update     (refresh package lists)\n  sudo apt upgrade    (install updates)\n  sudo apt install antivirus',
           unlock: 'Unlock doors using the password.\n\nExample: unlock password1',
+          apt: 'Package manager. Run in sequence: update → upgrade → clean → autoremove → install.\n\nExamples:\n  sudo apt update       (refresh package lists)\n  sudo apt upgrade      (install updates)\n  sudo apt clean        (clear cache)\n  sudo apt autoremove   (remove unused packages)\n  sudo apt install antivirus',
+          antivirus: 'Run antivirus scan to find and remove malware.\n\nExamples:\n  antivirus  (scan and remove badfiles)\n\nNote: Install first with sudo apt install antivirus',
+          tar: 'Extract compressed archives.\n\nExamples:\n  tar -xzf file.tar.gz  (extract archive)',
+          mv: 'Move or rename files and directories.\n\nExamples:\n  mv oldname.txt newname.txt  (rename)\n  mv file.txt /path/to/dir/   (move to directory)',
+          cp: 'Copy files. Use -r for directories.\n\nExamples:\n  cp file1.txt file2.txt  (copy file)\n  cp file.txt /path/to/dir/   (copy to directory)',
           help: 'Show available commands.\n\nExample: help',
           clear: 'Clear the terminal screen.\n\nExample: clear'
         };
-        const msg = manPages[topic] || 'Unknown command. Try: man ls, man cd, man cat, man rm';
+        const msg = manPages[topic] || 'Unknown command. Try: man ls, man cd, man cat, man rm, man apt, man antivirus';
         printLines(msg, 'less-content');
         break;
       }
@@ -772,7 +999,8 @@
       case 'help': {
         print('Commands:', 'system');
         print('  ls, cd, pwd, cat, echo, rm, mkdir, touch, rmdir, man, sudo, unlock, clear, help', 'system');
-        print('  man — spirit guide. Try "man" or "man ls"', 'system');
+        print('  tar, antivirus - Act 2 commands', 'system');
+        print('  man — spirit guide. Try "man" or "man apt"', 'system');
         break;
       }
 
@@ -785,6 +1013,225 @@
       case 'reset': {
         print('Resetting system...', 'system');
         setTimeout(() => resetGame(), 1500);
+        break;
+      }
+
+      // ----- Act 2 Commands -----
+      case 'antivirus': {
+        if (!antivirusInstalled) {
+          print('antivirus: command not found. Install with: sudo apt install antivirus', 'error');
+          break;
+        }
+        print('Starting antivirus scan...', 'system');
+        print('', 'system');
+        
+        // Scan the filesystem for badfiles
+        const badfilePaths = [];
+        function findBadfiles(node, path) {
+          if (!node || !node.children) return;
+          for (const [name, child] of Object.entries(node.children)) {
+            const fullPath = path ? path + '/' + name : name;
+            if (name === 'badfile' && child.type === 'file' && !removedPaths.has(fullPath)) {
+              badfilePaths.push(fullPath);
+            }
+            if (child.type === 'dir') {
+              findBadfiles(child, fullPath);
+            }
+          }
+        }
+        findBadfiles(fs[''], '');
+        
+        if (badfilePaths.length === 0) {
+          print('Scan complete. No threats found.', 'success');
+          break;
+        }
+        
+        // Scan and remove each badfile
+        let index = 0;
+        function scanNext() {
+          if (index < badfilePaths.length) {
+            const path = badfilePaths[index];
+            print('Scanning /' + path + '...', 'system');
+            setTimeout(() => {
+              print('  INFECTED → REMOVED', 'error');
+              removedPaths.add(path);
+              badfilesRemoved++;
+              index++;
+              if (index < badfilePaths.length) {
+                scanNext();
+              } else {
+                // All done
+                print('', 'system');
+                print('Scan complete. ' + badfilePaths.length + ' threats neutralized.', 'success');
+                if (badfilesRemoved >= 20) {
+                  spiritSay('All threats eliminated. Now install firewall: sudo apt install firewall');
+                } else {
+                  spiritSay(badfilesRemoved + ' threats eliminated. Continue scanning if more remain.');
+                }
+              }
+            }, 100);
+          }
+        }
+        scanNext();
+        break;
+      }
+
+      case 'tar': {
+        const parts = arg.split(/\s+/);
+        const flags = parts[0] || '';
+        const fileArg = parts[1];
+        
+        if (!flags.includes('x') || !flags.includes('z') || !flags.includes('f')) {
+          print('tar: you must specify -xzf flag to extract', 'error');
+          print('Usage: tar -xzf <archive.tar.gz>', 'system');
+          break;
+        }
+        
+        if (!fileArg) {
+          print('tar: no file specified', 'error');
+          break;
+        }
+        
+        const filePath = resolvePath(cwd, fileArg);
+        const fileNode = getNode(filePath);
+        
+        if (!fileNode) {
+          print('tar: ' + fileArg + ': No such file or directory', 'error');
+          break;
+        }
+        
+        if (fileNode.type !== 'file') {
+          print('tar: ' + fileArg + ': Not a regular file', 'error');
+          break;
+        }
+        
+        // Extract the tarball
+        const extractDir = fileArg.replace('.tar.gz', '');
+        const parentPath = filePath.split('/').slice(0, -1).join('/');
+        const parent = getNode(parentPath);
+        
+        if (!parent) {
+          print('tar: could not access parent directory', 'error');
+          break;
+        }
+        
+        // Create extracted directory
+        parent.children[extractDir] = {
+          type: 'dir',
+          desc: 'Extracted firewall package.',
+          children: {
+            'config.txt': {
+              type: 'file',
+              content: 'FIREWALL_RULES=strict\nDEFAULT_POLICY=deny\nLOG_LEVEL=verbose',
+              writable: true
+            }
+          }
+        };
+        
+        print('Extracted ' + fileArg + ' to ' + extractDir + '/', 'success');
+        print('', 'system');
+        print('Contents:', 'system');
+        print('  config.txt', 'system');
+        break;
+      }
+
+      case 'mv': {
+        const mvParts = arg.split(/\s+/);
+        if (mvParts.length < 2) {
+          print('mv: missing file operand', 'error');
+          print('Usage: mv <source> <destination>', 'system');
+          break;
+        }
+        const source = mvParts[0];
+        const dest = mvParts[1];
+        
+        const sourcePath = resolvePath(cwd, source);
+        const sourceNode = getNode(sourcePath);
+        
+        if (!sourceNode) {
+          print('mv: cannot stat \'' + source + '\': No such file or directory', 'error');
+          break;
+        }
+        
+        // Check if destination is a directory
+        const destPath = resolvePath(cwd, dest);
+        const destNode = getNode(destPath);
+        
+        if (destNode && destNode.type === 'dir') {
+          // Moving into a directory
+          const fileName = source.split('/').pop();
+          const newPath = destPath ? destPath + '/' + fileName : fileName;
+          const newParent = getNode(destPath);
+          
+          if (newParent && newParent.children) {
+            newParent.children[fileName] = sourceNode;
+            // Remove from old location
+            const parentPath = sourcePath.split('/').slice(0, -1).join('/');
+            const oldParent = getNode(parentPath);
+            if (oldParent) {
+              delete oldParent.children[source.split('/').pop()];
+            }
+            print('renamed \'' + source + '\' -> \'' + dest + '/' + fileName + '\'', 'success');
+          }
+        } else {
+          // Renaming in place
+          const parentPath = sourcePath.split('/').slice(0, -1).join('/');
+          const parent = getNode(parentPath);
+          
+          if (parent) {
+            delete parent.children[source.split('/').pop()];
+            parent.children[dest] = sourceNode;
+            print('renamed \'' + source + '\' -> \'' + dest + '\'', 'success');
+          }
+        }
+        break;
+      }
+
+      case 'cp': {
+        const cpParts = arg.split(/\s+/);
+        if (cpParts.length < 2) {
+          print('cp: missing file operand', 'error');
+          print('Usage: cp <source> <destination>', 'system');
+          break;
+        }
+        const source = cpParts[0];
+        const dest = cpParts[1];
+        
+        const sourcePath = resolvePath(cwd, source);
+        const sourceNode = getNode(sourcePath);
+        
+        if (!sourceNode) {
+          print('cp: cannot stat \'' + source + '\': No such file or directory', 'error');
+          break;
+        }
+        
+        if (sourceNode.type === 'dir') {
+          print('cp: -r not specified; omitting directory \'' + source + '\'', 'error');
+          break;
+        }
+        
+        // Deep copy the node
+        const destPath = resolvePath(cwd, dest);
+        const destNode = getNode(destPath);
+        
+        if (destNode && destNode.type === 'dir') {
+          // Copying into a directory
+          const fileName = source.split('/').pop();
+          const newParent = getNode(destPath);
+          if (newParent && newParent.children) {
+            newParent.children[fileName] = JSON.parse(JSON.stringify(sourceNode));
+            print('copied \'' + source + '\' -> \'' + dest + '/' + fileName + '\'', 'success');
+          }
+        } else {
+          // Copying to a new file
+          const parentPath = destPath.split('/').slice(0, -1).join('/');
+          const parent = getNode(parentPath);
+          
+          if (parent) {
+            parent.children[dest] = JSON.parse(JSON.stringify(sourceNode));
+            print('copied \'' + source + '\' -> \'' + dest + '\'', 'success');
+          }
+        }
         break;
       }
 
@@ -847,6 +1294,22 @@
     print('The virus core has been deleted. Your home network is now clean.', 'system');
     print('Your memory has been fully restored.', 'system');
     print('');
+    print('═══════════════════════════════════════════════════════════════', 'quest');
+    print('  ACT 2: SYSTEM HARDENING', 'quest');
+    print('═══════════════════════════════════════════════════════════════', 'quest');
+    print('');
+    print('The system is still vulnerable. Run maintenance to strengthen it:', 'system');
+    print('');
+    print('Step 1: sudo apt update', 'system');
+    print('Step 2: sudo apt upgrade (type Y to confirm)', 'system');
+    print('Step 3: sudo apt clean', 'system');
+    print('Step 4: sudo apt autoremove', 'system');
+    print('Step 5: sudo apt install antivirus', 'system');
+    print('Step 6: antivirus', 'system');
+    print('Step 7: sudo apt install firewall', 'system');
+    print('');
+    spiritSay('Begin system maintenance: sudo apt update');
+    print('');
     print('Type "reset" to play again.', 'system');
     print('');
   }
@@ -864,6 +1327,50 @@
       return;
     }
     print('[sudo] password accepted.', 'success');
+    
+    // Handle package installations
+    if (target === 'install_antivirus') {
+      print('Installing antivirus...', 'system');
+      print('Downloading package... Done', 'system');
+      print('Extracting files... Done', 'system');
+      print('Setting up antivirus... Done', 'system');
+      print('Antivirus installed successfully.', 'success');
+      print('', 'system');
+      print('Type "antivirus" to run a system scan.', 'system');
+      spiritSay('Antivirus installed. Type "antivirus" to run system scan.');
+      antivirusInstalled = true;
+      setPrompt();
+      return;
+    }
+    
+    if (target === 'install_firewall') {
+      print('Installing firewall...', 'system');
+      print('', 'system');
+      print('Downloading firewall.tar.gz...', 'system');
+      // Simulate download progress
+      setTimeout(() => print('0%...', 'system'), 100);
+      setTimeout(() => print('25%...', 'system'), 300);
+      setTimeout(() => print('50%...', 'system'), 500);
+      setTimeout(() => print('75%...', 'system'), 700);
+      setTimeout(() => {
+        print('100%', 'system');
+        print('Download complete: firewall.tar.gz', 'success');
+        print('', 'system');
+        // Create the firewall tarball in tmp/downloads
+        const downloads = getNode('tmp/downloads');
+        if (downloads && downloads.children) {
+          downloads.children['firewall.tar.gz'] = {
+            type: 'file',
+            content: 'FIREWALL_RULES=strict\nDEFAULT_POLICY=deny\nLOG_LEVEL=verbose'
+          };
+        }
+        firewallDownloaded = true;
+        spiritSay('Package downloaded to /tmp/downloads/. Extract and install: cd /tmp/downloads, then tar -xzf firewall.tar.gz');
+        setPrompt();
+      }, 900);
+      return;
+    }
+    
     const node = getNode(target);
     if (node && node.type === 'boss') {
       bossDefeated = true;
@@ -908,6 +1415,35 @@
       startAct1();
       return;
     }
+    
+    // Handle apt upgrade confirmation
+    if (inputEl.dataset.aptUpgradePending === '1') {
+      delete inputEl.dataset.aptUpgradePending;
+      inputEl.placeholder = '';
+      const response = line.trim().toLowerCase();
+      if (response === 'y' || response === 'yes' || response === '') {
+        print('Y', 'system');
+        print('Get:1 http://archive.ubuntu.com focal InRelease [234 kB]', 'system');
+        print('Get:2 http://security.ubuntu.com focal-security InRelease [45.6 kB]', 'system');
+        print('Reading state information... Done', 'system');
+        print('Preparing to upgrade... Done', 'system');
+        print('Unpacking replacement libc6... Done', 'system');
+        print('Setting up libc6 (2.31-0ubuntu9.4)... Done', 'system');
+        print('Unpacking replacement systemd... Done', 'system');
+        print('Setting up systemd (245.4-4ubuntu3.1)... Done', 'system');
+        print('Processing triggers for man-db... Done', 'system');
+        print('', 'system');
+        print('System packages upgraded.', 'success');
+        aptUpgraded = true;
+        spiritSay('System packages upgraded. Run "sudo apt clean" to clear cache.');
+      } else {
+        print(response || 'n', 'system');
+        print('Upgrade aborted.', 'system');
+      }
+      setPrompt();
+      return;
+    }
+    
     if (inputEl.dataset.sudoPending === '1') {
       handleSudoPassword(line);
       return;
