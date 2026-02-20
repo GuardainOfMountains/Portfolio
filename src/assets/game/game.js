@@ -231,6 +231,13 @@
             }
           }
         },
+        srv: {
+          type: 'dir',
+          desc: 'Service data.',
+          children: {
+            badfile: { type: 'file', content: 'MALWARE_SIGNATURE=detected\nTHREAT_LEVEL=high\nSTATUS=quarantined' }
+          }
+        },
         'lost+found': {
           type: 'dir',
           desc: 'Lost and found recovered files.',
