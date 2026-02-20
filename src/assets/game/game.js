@@ -842,8 +842,14 @@
             }
             
             if (aptArg === 'firewall') {
-              if (!antivirusInstalled || badfilesRemoved < 20) {
-                print('E: firewall requires antivirus to be installed and all threats removed first.', 'error');
+              if (!antivirusInstalled) {
+                print('E: firewall requires antivirus to be installed first.', 'error');
+                print('Run: sudo apt install antivirus', 'system');
+                break;
+              }
+              if (badfilesRemoved < 20) {
+                print('E: firewall requires all threats to be removed first.', 'error');
+                print('Run antivirus to remove all ' + badfilesRemoved + '/20 threats detected.', 'system');
                 break;
               }
               // Prompt for password
@@ -1075,7 +1081,12 @@
         findBadfiles(fs[''], '');
         
         if (badfilePaths.length === 0) {
-          print('Scan complete. No threats found.', 'success');
+          print('Scan complete. No threats found. (Total removed: ' + badfilesRemoved + ')', 'success');
+          if (badfilesRemoved >= 20) {
+            spiritSay('All threats eliminated! You can now install the firewall: sudo apt install firewall');
+          } else {
+            spiritSay(badfilesRemoved + ' threats removed so far. Run antivirus again if more threats appear.');
+          }
           break;
         }
         
@@ -1321,9 +1332,13 @@
   function victoryMessage() {
     // Full reset for Act 2 - clear terminal and filesystem, start fresh
     
-    // Clear terminal history array and DOM
+    // Clear terminal history array and DOM FIRST
     terminalLines.length = 0;
     output.innerHTML = '';
+    
+    // Reset removedPaths BEFORE resetting filesystem
+    // This ensures badfiles are "found" again in the fresh filesystem
+    removedPaths.clear();
     
     // Reset filesystem to initial state (restores all badfiles for Act 2)
     fs = JSON.parse(JSON.stringify(INITIAL_FS));
@@ -1331,7 +1346,6 @@
     // Reset game state but keep Act 1 completion flags
     cwd = 'home';
     fragmentsFound.clear();
-    removedPaths.clear();
     journalEntries.length = 0;
     bedroomEchoTaught = false;
     
