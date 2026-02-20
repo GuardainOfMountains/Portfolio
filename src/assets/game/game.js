@@ -207,7 +207,17 @@
           type: 'dir',
           desc: 'System configuration.',
           children: {
-            firewall: { type: 'dir', desc: 'Firewall configuration.', children: {} },
+            firewall: { 
+              type: 'dir', 
+              desc: 'Firewall configuration.', 
+              children: {
+                old_firewall: { 
+                  type: 'file', 
+                  content: 'FIREWALL_RULES=open\nDEFAULT_POLICY=allow\nLOG_LEVEL=quiet\n# This is the old weak firewall config - replace with the new one!',
+                  writable: true 
+                }
+              } 
+            },
             config: {
               type: 'dir',
               desc: 'Configuration files.',
@@ -950,6 +960,23 @@
           if (op === '>') {
             fileNode.content = content;
             print('(overwritten)', 'success');
+            
+            // Check for Act 2 completion: config.txt moved to /etc/firewall/ or backup created
+            if (filePath.startsWith('etc/firewall/') || filePath.startsWith('/etc/firewall/')) {
+              const fileName = filePath.split('/').pop();
+              if (fileName === 'config.txt' || fileName !== 'old_firewall') {
+                print('');
+                print('═══════════════════════════════════════════════════════════════', 'quest');
+                print('  *** ACT 2 COMPLETE ***', 'quest');
+                print('═══════════════════════════════════════════════════════════════', 'quest');
+                print('');
+                print('Firewall configuration complete! Your system is now protected.', 'success');
+                print('');
+                spiritSay('Congratulations! You have completed all acts in Terminus. The system is safe.');
+                print('');
+                print('Type "reset" to play again.', 'system');
+              }
+            }
           } else { // '>>'
             fileNode.content = (fileNode.content || '') + content + '\n';
             print('(appended)', 'success');
@@ -1183,6 +1210,8 @@
         print('', 'system');
         print('Contents:', 'system');
         print('  config.txt', 'system');
+        print('', 'system');
+        spiritSay('Firewall extracted! Now: 1) cat config.txt to see new rules, 2) mv config.txt /etc/firewall/ to install, 3) cd /etc/firewall, 4) backup new config with echo > backup.txt');
         break;
       }
 
@@ -1223,6 +1252,20 @@
               delete oldParent.children[source.split('/').pop()];
             }
             print('renamed \'' + source + '\' -> \'' + dest + '/' + fileName + '\'', 'success');
+            
+            // Check for Act 2 completion: config.txt moved to /etc/firewall/
+            if (newPath === 'etc/firewall/config.txt' || newPath === '/etc/firewall/config.txt') {
+              print('');
+              print('═══════════════════════════════════════════════════════════════', 'quest');
+              print('  *** ACT 2 COMPLETE ***', 'quest');
+              print('═══════════════════════════════════════════════════════════════', 'quest');
+              print('');
+              print('Firewall configuration complete! Your system is now protected.', 'success');
+              print('');
+              spiritSay('Congratulations! You have completed all acts in Terminus. The system is safe.');
+              print('');
+              print('Type "reset" to play again.', 'system');
+            }
           }
         } else {
           // Renaming in place
