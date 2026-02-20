@@ -1306,6 +1306,38 @@
   }
 
   function victoryMessage() {
+    // Full reset for Act 2 - clear terminal and filesystem, start fresh
+    
+    // Clear terminal history array and DOM
+    terminalLines.length = 0;
+    output.innerHTML = '';
+    
+    // Reset filesystem to initial state (restores all badfiles for Act 2)
+    fs = JSON.parse(JSON.stringify(INITIAL_FS));
+    
+    // Reset game state but keep Act 1 completion flags
+    cwd = 'home';
+    fragmentsFound.clear();
+    removedPaths.clear();
+    journalEntries.length = 0;
+    bedroomEchoTaught = false;
+    
+    // Reset Act 2 state variables for fresh start
+    aptUpdated = false;
+    aptUpgraded = false;
+    aptCleaned = false;
+    aptAutoremoved = false;
+    antivirusInstalled = false;
+    firewallDownloaded = false;
+    badfilesRemoved = 0;
+    
+    // Keep Act 1 completion flags
+    // bossDefeated = true (already set before calling victoryMessage)
+    // homeUnlocked = true (already set when doors were unlocked)
+    
+    // Update prompt for fresh start
+    setPrompt();
+    
     print('');
     print('═══════════════════════════════════════════════════════════════', 'quest');
     print('  *** SYSTEM RECOVERY COMPLETE ***', 'quest');
