@@ -1016,6 +1016,26 @@
         break;
       }
 
+      // Debug command to skip to Act 2
+      case 'act2': {
+        if (bossDefeated) {
+          print('Act 2 already available!', 'system');
+          break;
+        }
+        // Set all Act 1 completion states
+        bossDefeated = true;
+        homeUnlocked = true;
+        fragmentsFound = new Set(['pass', 'word', '1']);
+        // Add all fragments to journal
+        const journal = getNode('home/bedroom/journal');
+        if (journal) {
+          journal.fragment = 'all';
+        }
+        print('Skipping to Act 2...', 'success');
+        victoryMessage();
+        break;
+      }
+
       // ----- Act 2 Commands -----
       case 'antivirus': {
         if (!antivirusInstalled) {
