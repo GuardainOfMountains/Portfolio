@@ -750,18 +750,19 @@
         const topic = (arg || '').toLowerCase();
         const manPages = {
           '': 'MISSION: Find 3 password fragments in the house → Destroy Badfile_emiter in forest cave → Unlock home → Remove V1rUs_c0R3 from basement',
-          ls: 'List files and directories in current location.',
-          cd: 'Change directory. Use "cd .." to go back.',
-          cat: 'Read and display file contents.',
-          rm: 'Remove/delete files. Use "sudo rm" for locked files.',
-          pwd: 'Print current directory path.',
-          echo: 'Display text or write to files using > or >>.',
-          mkdir: 'Create a new directory.',
-          touch: 'Create an empty file.',
-          rmdir: 'Remove an empty directory.',
-          sudo: 'Run commands as superuser. Required for boss files.',
-          unlock: 'Unlock doors using the password.',
-          help: 'Show available commands.'
+          ls: 'List files and directories in current location.\n\nExample: ls',
+          cd: 'Change directory. Use "cd .." to go back.\n\nExamples:\n  cd livingroom   (enter a room)\n  cd ..          (go back/up)\n  cd /            (go to root)',
+          cat: 'Read and display file contents.\n\nExamples:\n  cat note        (read a file called "note")\n  cat sticky_note (read a file)',
+          rm: 'Remove/delete files. Use "sudo rm" for locked files.\n\nExamples:\n  rm badfile           (delete a file)\n  sudo rm Badfile_emiter (delete locked file)',
+          pwd: 'Print current directory path.\n\nExample: pwd',
+          echo: 'Display text or write to files using > or >>.\n\nExamples:\n  echo "Hello world"              (print text)\n  echo "text" > file.txt           (write to file)\n  echo "text" >> file.txt          (append to file)',
+          mkdir: 'Create a new directory.\n\nExample: mkdir myfolder',
+          touch: 'Create an empty file.\n\nExample: touch myfile.txt',
+          rmdir: 'Remove an empty directory.\n\nExample: rmdir myfolder',
+          sudo: 'Run commands as superuser. Required for boss files.\n\nExamples:\n  sudo rm Badfile_emiter (destroy virus emitter)\n  sudo rm V1rUs_c0R3    (destroy virus core)',
+          unlock: 'Unlock doors using the password.\n\nExample: unlock password1',
+          help: 'Show available commands.\n\nExample: help',
+          clear: 'Clear the terminal screen.\n\nExample: clear'
         };
         const msg = manPages[topic] || 'Unknown command. Try: man ls, man cd, man cat, man rm';
         printLines(msg, 'less-content');
