@@ -970,8 +970,13 @@
 
       case 'man': {
         const topic = (arg || '').toLowerCase();
+        
+        // Determine mission based on current act
+        const act2Mission = 'MISSION: Run system maintenance (apt update → upgrade → clean → autoremove) → Install antivirus (sudo apt install antivirus) → Run scan (antivirus) → Install firewall (sudo apt install firewall) → Extract and configure firewall';
+        const act1Mission = 'MISSION: Find 3 password fragments in the house → Destroy Badfile_emiter in forest cave → Unlock home → Remove V1rUs_c0R3 from basement → Run system maintenance (apt update/upgrade/clean/autoremove) → Install antivirus → Install firewall';
+        
         const manPages = {
-          '': 'MISSION: Find 3 password fragments in the house → Destroy Badfile_emiter in forest cave → Unlock home → Remove V1rUs_c0R3 from basement → Run system maintenance (apt update/upgrade/clean/autoremove) → Install antivirus → Install firewall',
+          '': bossDefeated ? act2Mission : act1Mission,
           ls: 'List files and directories in current location.\n\nExample: ls',
           cd: 'Change directory. Use "cd .." to go back.\n\nExamples:\n  cd livingroom   (enter a room)\n  cd ..          (go back/up)\n  cd /            (go to root)',
           cat: 'Read and display file contents.\n\nExamples:\n  cat note        (read a file called "note")\n  cat sticky_note (read a file)',
@@ -998,8 +1003,16 @@
 
       case 'help': {
         print('Commands:', 'system');
-        print('  ls, cd, pwd, cat, echo, rm, mkdir, touch, rmdir, man, sudo, unlock, clear, help', 'system');
-        print('  tar, antivirus - Act 2 commands', 'system');
+        if (bossDefeated) {
+          print('  sudo apt update | upgrade | clean | autoremove', 'system');
+          print('  sudo apt install antivirus | firewall', 'system');
+          print('  antivirus  (scan for malware)', 'system');
+          print('  tar -xzf  (extract archives)', 'system');
+          print('  cd, ls, pwd, cat, rm, mkdir, touch, clear, man', 'system');
+        } else {
+          print('  ls, cd, pwd, cat, echo, rm, mkdir, touch, rmdir, man, sudo, unlock, clear, help', 'system');
+          print('  tar, antivirus - Act 2 commands', 'system');
+        }
         print('  man — spirit guide. Try "man" or "man apt"', 'system');
         break;
       }
