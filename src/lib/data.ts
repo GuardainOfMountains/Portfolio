@@ -17,10 +17,10 @@ export interface Experience {
 
 export const PROFILE = {
   name: "Montana Howard",
-  title: "Systems Engineer / Infrastructure Developer",
-  email: "montanallahoward@gmail.com",
+  title: "Full-Stack Engineer / User Experience",
+  email: "MontanaLHoward@outlook.com",
   philosophy: {
-    core: "Optimization. Automation. UX.",
+    core: "Planning. Optimization. Secure.",
     narrative: "I don't just fix servers; I remove friction. If I do it twice, I script it. If it lags, I trace it. I build internal tooling that makes systems fast and low-friction for everyone.",
   },
   experience: [
